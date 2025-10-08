@@ -72,6 +72,7 @@
     align-items: center;
     justify-content: flex-start;
     overflow-y: auto;
+    position: relative;
   }
   header {
     font-size: 2.2rem;
@@ -139,15 +140,28 @@
     width: 0%;
     transition: width 0.5s ease;
   }
-  @media (max-width: 800px) {
-    body { flex-direction: column; }
-    .sidebar { width: 100%; max-height: 200px; flex-direction: row; overflow-x: auto; }
-    .upgrade-btn { font-size: 0.85rem; padding: 10px; }
-    .main { padding: 10px; }
-    header { font-size: 1.8rem; }
-    .bitcoin-img { width: 120px; }
-    .stats { font-size: 1rem; }
+  /* Confirmation Overlay */
+  #confirmRestart {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
   }
+  #confirmRestart button {
+    margin: 10px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  #confirmRestart .yes-btn { background: #27ae60; color: white; }
+  #confirmRestart .no-btn { background: #c0392b; color: white; }
 </style>
 </head>
 <body>
@@ -163,9 +177,16 @@
   <div class="stats" id="autoClickInfo">Auto-click: OFF</div>
   <div class="stats" id="prestigeInfo">Prestige Level: 0 | Bonus: x1</div>
   <div class="progress-bar"><div class="progress" id="progressBar"></div></div>
-  <button class="restart-btn" onclick="restartGame()">Restart Game</button>
+  <button class="restart-btn" onclick="showConfirmRestart()">Restart Game</button>
   <button class="prestige-btn" onclick="prestigeGame()">Prestige</button>
   <div id="achievements"></div>
+
+  <!-- Confirmation Overlay -->
+  <div id="confirmRestart">
+    <div style="color:white; font-size:1.5rem; margin-bottom:20px;">Are you sure you want to restart?</div>
+    <button class="yes-btn" onclick="confirmRestart()">Yes</button>
+    <button class="no-btn" onclick="hideConfirmRestart()">No</button>
+  </div>
 </div>
 <script>
 let balance = 0;
@@ -174,25 +195,29 @@ let autoClickBtc = 0;
 let autoClickInterval = null;
 let prestigeLevel = 0;
 let prestigeBonus = 1;
-let upgrades = {
-  miner: { cost: 10, btcIncrease: 1, count: 0, type: "click" },
-  farm: { cost: 50, btcIncrease: 5, count: 0, type: "click" },
-  datacenter: { cost: 200, btcIncrease: 20, count: 0, type: "click" },
-  ai: { cost: 1000, btcIncrease: 100, count: 0, type: "click" },
-  quantum: { cost: 5000, btcIncrease: 500, count: 0, type: "click" },
-  galaxy: { cost: 25000, btcIncrease: 2500, count: 0, type: "click" },
-  universe: { cost: 100000, btcIncrease: 10000, count: 0, type: "click" },
-  infinity: { cost: 500000, btcIncrease: 50000, count: 0, type: "click" },
-  autoMiner: { cost: 100, btcIncrease: 2, count: 0, type: "auto" },
-  autoFarm: { cost: 500, btcIncrease: 10, count: 0, type: "auto" },
-  autoCenter: { cost: 2000, btcIncrease: 50, count: 0, type: "auto" },
-  autoAI: { cost: 10000, btcIncrease: 200, count: 0, type: "auto" },
-  autoQuantum: { cost: 50000, btcIncrease: 1000, count: 0, type: "auto" }
-};
+let upgrades = {};
 let achievementsUnlocked = [];
 
+function resetUpgrades() {
+  upgrades = {
+    miner: { cost: 10, btcIncrease: 1, count: 0, type: "click" },
+    farm: { cost: 50, btcIncrease: 5, count: 0, type: "click" },
+    datacenter: { cost: 200, btcIncrease: 20, count: 0, type: "click" },
+    ai: { cost: 1000, btcIncrease: 100, count: 0, type: "click" },
+    quantum: { cost: 5000, btcIncrease: 500, count: 0, type: "click" },
+    galaxy: { cost: 25000, btcIncrease: 2500, count: 0, type: "click" },
+    universe: { cost: 100000, btcIncrease: 10000, count: 0, type: "click" },
+    infinity: { cost: 500000, btcIncrease: 50000, count: 0, type: "click" },
+    autoMiner: { cost: 100, btcIncrease: 2, count: 0, type: "auto" },
+    autoFarm: { cost: 500, btcIncrease: 10, count: 0, type: "auto" },
+    autoCenter: { cost: 2000, btcIncrease: 50, count: 0, type: "auto" },
+    autoAI: { cost: 10000, btcIncrease: 200, count: 0, type: "auto" },
+    autoQuantum: { cost: 50000, btcIncrease: 1000, count: 0, type: "auto" }
+  };
+}
+
 function mineBitcoin() {
-  balance += btcPerClick * prestigeBonus;
+  balance += Math.floor(btcPerClick * prestigeBonus);
   animateClick();
   checkAchievements();
   updateDisplay();
@@ -223,7 +248,7 @@ function buyUpgrade(type) {
 function startAutoClick() {
   if (autoClickInterval) return;
   autoClickInterval = setInterval(() => {
-    balance += autoClickBtc * prestigeBonus;
+    balance += Math.floor(autoClickBtc * prestigeBonus);
     checkAchievements();
     updateDisplay();
     saveGame();
@@ -252,11 +277,7 @@ function checkAchievements() {
     { name: "Bitcoin Miner", condition: upgrades.miner.count >= 1 },
     { name: "Auto Miner", condition: upgrades.autoMiner.count >= 1 },
     { name: "Data Tycoon", condition: upgrades.datacenter.count >= 1 },
-    { name: "AI Overlord", condition: upgrades.ai.count >= 1 },
-    { name: "Quantum Lord", condition: upgrades.quantum.count >= 1 },
-    { name: "Galactic Tycoon", condition: upgrades.galaxy.count >= 1 },
-    { name: "Universal Overlord", condition: upgrades.universe.count >= 1 },
-    { name: "Infinity Master", condition: upgrades.infinity.count >= 1 }
+    { name: "AI Overlord", condition: upgrades.ai.count >= 1 }
   ];
   for (let achievement of achievementList) {
     if (achievement.condition && !achievementsUnlocked.includes(achievement.name)) {
@@ -293,11 +314,26 @@ function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function restartGame() {
-  if (confirm("Are you sure you want to restart?")) {
-    localStorage.removeItem("bitcoinClickerSave");
-    location.reload();
-  }
+function showConfirmRestart() {
+  document.getElementById("confirmRestart").style.display = "flex";
+}
+
+function hideConfirmRestart() {
+  document.getElementById("confirmRestart").style.display = "none";
+}
+
+function confirmRestart() {
+  balance = 0;
+  btcPerClick = 1;
+  autoClickBtc = 0;
+  prestigeLevel = 0;
+  prestigeBonus = 1;
+  achievementsUnlocked = [];
+  autoClickInterval = null;
+  resetUpgrades();
+  localStorage.removeItem("bitcoinClickerSave");
+  hideConfirmRestart();
+  updateDisplay();
 }
 
 function prestigeGame() {
@@ -308,10 +344,7 @@ function prestigeGame() {
     btcPerClick = 1;
     autoClickBtc = 0;
     autoClickInterval = null;
-    for (let key in upgrades) {
-      upgrades[key].count = 0;
-      upgrades[key].cost = Math.floor(upgrades[key].cost / Math.pow(1.5, upgrades[key].count));
-    }
+    resetUpgrades();
     saveGame();
     updateDisplay();
     showAchievement("Prestige Achieved!");
@@ -325,6 +358,7 @@ function saveGame() {
 
 function loadGame() {
   let save = JSON.parse(localStorage.getItem("bitcoinClickerSave"));
+  resetUpgrades();
   if (save) {
     balance = save.balance;
     btcPerClick = save.btcPerClick;
