@@ -3,82 +3,225 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultimate Bitcoin Clicker</title>
+<title>Bitcoin Clicker Deluxe</title>
 <style>
-  body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); color: white; display: flex; height: 100vh; overflow: hidden; }
-  .sidebar { width: 320px; background: #121212; padding: 20px; box-shadow: 3px 0px 15px rgba(0,0,0,0.7); display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
-  .sidebar h2 { font-size: 1.8rem; margin-bottom: 15px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px; width: 100%; }
-  .upgrade-btn { width: 100%; background: #1e1e1e; margin: 8px 0; padding: 15px; border-radius: 12px; border: none; color: white; font-size: 1rem; cursor: pointer; text-align: left; transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease; display: flex; flex-direction: column; }
-  .upgrade-btn:hover { background: #2c2c2c; transform: scale(1.03); box-shadow: 0 0 10px rgba(255,255,255,0.2); }
-  .upgrade-title { font-weight: bold; font-size: 1.1rem; }
-  .upgrade-info { font-size: 0.9rem; opacity: 0.8; }
-  .main { flex: 1; padding: 40px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(to right, rgba(0,0,0,0.2), rgba(0,0,0,0.1)); }
-  header { font-size: 2.8rem; font-weight: bold; margin-bottom: 20px; text-shadow: 2px 2px 5px black; }
-  .bitcoin-img { width: 200px; cursor: pointer; animation: pulse 1.2s infinite ease-in-out; transition: transform 0.1s ease; }
-  @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-  .stats { font-size: 1.5rem; margin-top: 20px; text-shadow: 1px 1px 3px black; }
-  .restart-btn, .prestige-btn { background: #e74c3c; padding: 12px 25px; margin-top: 15px; border: none; border-radius: 10px; cursor: pointer; font-size: 1rem; color: white; transition: transform 0.2s ease, background 0.2s ease; }
-  .restart-btn:hover, .prestige-btn:hover { transform: scale(1.05); background: #c0392b; }
-  .achievement { background: rgba(255, 215, 0, 0.9); padding: 12px; border-radius: 8px; margin-top: 15px; display: none; animation: fadeIn 1s ease; color: black; font-weight: bold; box-shadow: 0px 0px 10px rgba(0,0,0,0.5); }
-  @keyframes fadeIn { 0% { opacity: 0; transform: translateY(-10px); } 100% { opacity: 1; transform: translateY(0); } }
-  .progress-bar { width: 100%; background: rgba(255,255,255,0.2); border-radius: 10px; overflow: hidden; margin-top: 20px; }
-  .progress { height: 20px; background: linear-gradient(90deg, #f39c12, #f1c40f); width: 0%; transition: width 0.5s ease; }
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: white;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+header {
+    width: 100%;
+    text-align: center;
+    padding: 8px;
+    background: #1a1a1a;
+    font-size: 18px;
+    font-weight: bold;
+}
+#gameArea {
+    display: flex;
+    width: 100%;
+}
+#mainGame {
+    flex: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    overflow-y: auto;
+}
+#bitcoinBtn {
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, gold, orange);
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.5);
+    animation: bounce 1s infinite;
+}
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+#bitcoinCount {
+    font-size: 18px;
+    margin: 10px;
+}
+#upgradesPanel {
+    flex: 1;
+    background: #111;
+    padding: 10px;
+    overflow-y: auto;
+    width: 250px;
+}
+.upgradeBtn {
+    width: 100%;
+    margin-bottom: 6px;
+    padding: 6px;
+    font-size: 14px;
+    background: #222;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.upgradeBtn:hover {
+    background: #333;
+}
+#prestigePanel {
+    background: #222;
+    padding: 6px;
+    margin-top: 10px;
+    text-align: center;
+}
+#achievements {
+    background: #111;
+    padding: 6px;
+    margin-top: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+.achievement {
+    font-size: 12px;
+    margin-bottom: 4px;
+}
 </style>
 </head>
 <body>
-<div class="sidebar">
-  <h2>🛠 Upgrades</h2>
-  <div id="upgradeList"></div>
-</div>
-<div class="main">
-  <header>💰 Bitcoin Clicker Deluxe</header>
-  <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg" alt="Bitcoin" class="bitcoin-img" onclick="mineBitcoin()">
-  <div class="stats" id="bitcoinBalance">₿ 0</div>
-  <div class="stats" id="bitcoinsPerClick">Bitcoins per click: 1</div>
-  <div class="stats" id="autoClickInfo">Auto-click: OFF</div>
-  <div class="stats" id="prestigeInfo">Prestige Level: 0 | Bonus: x1</div>
-  <div class="progress-bar"><div class="progress" id="progressBar"></div></div>
-  <button class="restart-btn" onclick="restartGame()">Restart Game</button>
-  <button class="prestige-btn" onclick="prestigeGame()">Prestige</button>
-  <div id="achievements"></div>
+<header>💰 Bitcoin Clicker Deluxe 💰</header>
+<div id="gameArea">
+    <div id="mainGame">
+        <div id="bitcoinCount">Bitcoins: 0</div>
+        <button id="bitcoinBtn"></button>
+        <div id="prestigePanel">
+            <button id="prestigeBtn">Prestige</button><br>
+            Prestige Points: <span id="prestigePoints">0</span>
+        </div>
+        <div id="achievements">
+            <strong>Achievements:</strong>
+            <div id="achievementList"></div>
+        </div>
+    </div>
+    <div id="upgradesPanel">
+        <h3>Upgrades</h3>
+        <div id="upgradeButtons"></div>
+    </div>
 </div>
 <script>
-let balance = 0;
-let btcPerClick = 1;
-let autoClickBtc = 0;
-let autoClickInterval = null;
-let prestigeLevel = 0;
-let prestigeBonus = 1;
-let upgrades = {
-  miner: { cost: 10, btcIncrease: 1, count: 0, type: "click" },
-  farm: { cost: 50, btcIncrease: 5, count: 0, type: "click" },
-  datacenter: { cost: 200, btcIncrease: 20, count: 0, type: "click" },
-  ai: { cost: 1000, btcIncrease: 100, count: 0, type: "click" },
-  quantum: { cost: 5000, btcIncrease: 500, count: 0, type: "click" },
-  galaxy: { cost: 25000, btcIncrease: 2500, count: 0, type: "click" },
-  universe: { cost: 100000, btcIncrease: 10000, count: 0, type: "click" },
-  infinity: { cost: 500000, btcIncrease: 50000, count: 0, type: "click" },
-  autoMiner: { cost: 100, btcIncrease: 2, count: 0, type: "auto" },
-  autoFarm: { cost: 500, btcIncrease: 10, count: 0, type: "auto" },
-  autoCenter: { cost: 2000, btcIncrease: 50, count: 0, type: "auto" },
-  autoAI: { cost: 10000, btcIncrease: 200, count: 0, type: "auto" },
-  autoQuantum: { cost: 50000, btcIncrease: 1000, count: 0, type: "auto" }
-};
-let achievementsUnlocked = [];
-function mineBitcoin() { balance += btcPerClick * prestigeBonus; animateClick(); checkAchievements(); updateDisplay(); saveGame(); }
-function buyUpgrade(type) { let upgrade = upgrades[type]; if (balance >= upgrade.cost) { balance -= upgrade.cost; upgrade.count++; if (upgrade.type === "click") { btcPerClick += upgrade.btcIncrease; } else if (upgrade.type === "auto") { autoClickBtc += upgrade.btcIncrease; startAutoClick(); } upgrade.cost = Math.floor(upgrade.cost * 1.5); animateUpgrade(type); checkAchievements(); updateDisplay(); saveGame(); } else { alert("Not enough Bitcoins!"); } }
-function startAutoClick() { if (autoClickInterval) return; autoClickInterval = setInterval(() => { balance += autoClickBtc * prestigeBonus; checkAchievements(); updateDisplay(); saveGame(); }, 1000); }
-function animateClick() { const bitcoinImg = document.querySelector(".bitcoin-img"); bitcoinImg.style.transform = "scale(1.2)"; setTimeout(() => bitcoinImg.style.transform = "scale(1)", 100); }
-function animateUpgrade(type) { const btns = document.getElementsByClassName("upgrade-btn"); for (let btn of btns) { if (btn.innerHTML.toLowerCase().includes(type.toLowerCase())) { btn.style.transform = "scale(1.05)"; setTimeout(() => btn.style.transform = "scale(1)", 200); } } }
-function checkAchievements() { let achievementList = [ { name: "First Bitcoin!", condition: balance >= 1 }, { name: "Bitcoin Miner", condition: upgrades.miner.count >= 1 }, { name: "Auto Miner", condition: upgrades.autoMiner.count >= 1 }, { name: "Data Tycoon", condition: upgrades.datacenter.count >= 1 }, { name: "AI Overlord", condition: upgrades.ai.count >= 1 }, { name: "Quantum Lord", condition: upgrades.quantum.count >= 1 }, { name: "Galactic Tycoon", condition: upgrades.galaxy.count >= 1 }, { name: "Universal Overlord", condition: upgrades.universe.count >= 1 }, { name: "Infinity Master", condition: upgrades.infinity.count >= 1 } ]; for (let achievement of achievementList) { if (achievement.condition && !achievementsUnlocked.includes(achievement.name)) { achievementsUnlocked.push(achievement.name); showAchievement(achievement.name); } } }
-function showAchievement(name) { const achContainer = document.getElementById("achievements"); let div = document.createElement("div"); div.className = "achievement"; div.innerText = `🏆 Achievement Unlocked: ${name}`; achContainer.appendChild(div); div.style.display = "block"; setTimeout(() => div.remove(), 4000); }
-function updateDisplay() { document.getElementById("bitcoinBalance").innerHTML = `₿ ${balance}`; document.getElementById("bitcoinsPerClick").innerHTML = `Bitcoins per click: ${btcPerClick} x${prestigeBonus}`; document.getElementById("autoClickInfo").innerHTML = `Auto-click: ₿ ${autoClickBtc} x${prestigeBonus}/sec`; document.getElementById("prestigeInfo").innerHTML = `Prestige Level: ${prestigeLevel} | Bonus: x${prestigeBonus}`; const upgradeList = document.getElementById("upgradeList"); upgradeList.innerHTML = ""; for (let key in upgrades) { upgradeList.innerHTML += `<button class="upgrade-btn" onclick="buyUpgrade('${key}')"><span class="upgrade-title">Buy ${capitalize(key)}</span><span class="upgrade-info">Cost: ₿ ${upgrades[key].cost} | +${upgrades[key].btcIncrease} BTC/${upgrades[key].type === "auto" ? "sec" : "click"}</span></button>`; } document.getElementById("progressBar").style.width = Math.min(balance/1000000*100,100) + "%"; }
-function capitalize(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
-function restartGame() { if (confirm("Are you sure you want to restart?")) { localStorage.removeItem("bitcoinClickerSave"); location.reload(); } }
-function prestigeGame() { if (confirm("Prestiging will reset your progress but give permanent bonuses!\nProceed?")) { prestigeLevel++; prestigeBonus = 1 + prestigeLevel * 0.2; balance = 0; btcPerClick = 1; autoClickBtc = 0; autoClickInterval = null; for (let key in upgrades) { upgrades[key].count = 0; upgrades[key].cost = Math.floor(upgrades[key].cost / Math.pow(1.5, upgrades[key].count)); } saveGame(); updateDisplay(); showAchievement("Prestige Achieved!"); } }
-function saveGame() { let save = { balance, btcPerClick, autoClickBtc, upgrades, achievementsUnlocked, prestigeLevel, prestigeBonus }; localStorage.setItem("bitcoinClickerSave", JSON.stringify(save)); }
-function loadGame() { let save = JSON.parse(localStorage.getItem("bitcoinClickerSave")); if (save) { balance = save.balance; btcPerClick = save.btcPerClick; autoClickBtc = save.autoClickBtc; upgrades = save.upgrades; achievementsUnlocked = save.achievementsUnlocked; prestigeLevel = save.prestigeLevel; prestigeBonus = save.prestigeBonus; if (autoClickBtc > 0) startAutoClick(); } }
-window.addEventListener("beforeunload", saveGame); loadGame(); updateDisplay();
+let bitcoins = 0;
+let prestigePoints = 0;
+let autoClickers = [];
+let upgrades = [
+    {name:"Small AutoClicker", price:50, amount:0, btcPerSec:0.1},
+    {name:"Medium AutoClicker", price:500, amount:0, btcPerSec:1},
+    {name:"Large AutoClicker", price:5000, amount:0, btcPerSec:10},
+    {name:"Mega AutoClicker", price:50000, amount:0, btcPerSec:100},
+    {name:"Giga AutoClicker", price:500000, amount:0, btcPerSec:1000},
+    {name:"Tera AutoClicker", price:5000000, amount:0, btcPerSec:10000}
+];
+let achievements = [];
+let achievementList = [
+    {name:"First Bitcoin!", condition:()=>bitcoins>=1, unlocked:false},
+    {name:"50 Bitcoins!", condition:()=>bitcoins>=50, unlocked:false},
+    {name:"1000 Bitcoins!", condition:()=>bitcoins>=1000, unlocked:false}
+];
+
+function updateDisplay() {
+    document.getElementById("bitcoinCount").innerText = `Bitcoins: ${bitcoins.toFixed(2)}`;
+    document.getElementById("prestigePoints").innerText = prestigePoints;
+}
+
+function saveGame() {
+    localStorage.setItem("btc", bitcoins);
+    localStorage.setItem("prestigePoints", prestigePoints);
+    localStorage.setItem("upgrades", JSON.stringify(upgrades));
+}
+function loadGame() {
+    bitcoins = parseFloat(localStorage.getItem("btc")) || 0;
+    prestigePoints = parseInt(localStorage.getItem("prestigePoints")) || 0;
+    let savedUpgrades = JSON.parse(localStorage.getItem("upgrades"));
+    if(savedUpgrades) upgrades = savedUpgrades;
+}
+
+function checkAchievements() {
+    let list = document.getElementById("achievementList");
+    list.innerHTML = "";
+    achievementList.forEach(a => {
+        if(!a.unlocked && a.condition()) {
+            a.unlocked = true;
+            achievements.push(a.name);
+        }
+        if(a.unlocked) {
+            let div = document.createElement("div");
+            div.className = "achievement";
+            div.innerText = "✅ " + a.name;
+            list.appendChild(div);
+        }
+    });
+}
+
+document.getElementById("bitcoinBtn").addEventListener("click", ()=>{
+    bitcoins += 1;
+    updateDisplay();
+    checkAchievements();
+    saveGame();
+});
+
+function buildUpgrades() {
+    let container = document.getElementById("upgradeButtons");
+    container.innerHTML = "";
+    upgrades.forEach((up,i) => {
+        let btn = document.createElement("button");
+        btn.className = "upgradeBtn";
+        btn.innerText = `${up.name} (${up.amount}) - ${up.price} BTC`;
+        btn.onclick = ()=>{
+            if(bitcoins >= up.price) {
+                bitcoins -= up.price;
+                up.amount++;
+                up.price = Math.floor(up.price*1.5);
+                updateDisplay();
+                buildUpgrades();
+                saveGame();
+            }
+        };
+        container.appendChild(btn);
+    });
+}
+
+function prestige() {
+    if(bitcoins >= 10000) {
+        prestigePoints++;
+        bitcoins = 0;
+        upgrades.forEach(u => u.amount=0);
+        buildUpgrades();
+        updateDisplay();
+        saveGame();
+    } else {
+        alert("Need 10,000 BTC to prestige!");
+    }
+}
+
+document.getElementById("prestigeBtn").addEventListener("click", prestige);
+
+function gameLoop() {
+    let btcPerSec = upgrades.reduce((sum, u) => sum + u.amount*u.btcPerSec, 0);
+    bitcoins += btcPerSec/10;
+    updateDisplay();
+    checkAchievements();
+    buildUpgrades();
+    saveGame();
+}
+loadGame();
+updateDisplay();
+buildUpgrades();
+setInterval(gameLoop,100);
+
+window.addEventListener("beforeunload", saveGame);
 </script>
 </body>
 </html>
