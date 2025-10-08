@@ -11,32 +11,32 @@ body {
     background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
     color: white;
     display: flex;
+    flex-direction: column;
     height: 100vh;
-    overflow: hidden;
 }
 header {
-    width: 100%;
     text-align: center;
     padding: 8px;
     background: #1a1a1a;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
 }
 #gameArea {
     display: flex;
-    width: 100%;
+    flex: 1;
+    overflow: hidden;
 }
 #mainGame {
     flex: 3;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 10px;
+    padding: 5px;
     overflow-y: auto;
 }
 #bitcoinBtn {
-    width: 150px;
-    height: 150px;
+    width: 120px;
+    height: 120px;
     background: radial-gradient(circle, gold, orange);
     border-radius: 50%;
     border: none;
@@ -46,24 +46,25 @@ header {
 }
 @keyframes bounce {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+    50% { transform: translateY(-8px); }
 }
 #bitcoinCount {
-    font-size: 18px;
-    margin: 10px;
+    font-size: 16px;
+    margin: 8px;
 }
 #upgradesPanel {
     flex: 1;
     background: #111;
-    padding: 10px;
+    padding: 8px;
     overflow-y: auto;
-    width: 250px;
+    width: 220px;
+    box-sizing: border-box;
 }
 .upgradeBtn {
     width: 100%;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
     padding: 6px;
-    font-size: 14px;
+    font-size: 13px;
     background: #222;
     border: none;
     border-radius: 5px;
@@ -76,18 +77,18 @@ header {
 #prestigePanel {
     background: #222;
     padding: 6px;
-    margin-top: 10px;
+    margin-top: 8px;
     text-align: center;
 }
 #achievements {
     background: #111;
     padding: 6px;
-    margin-top: 10px;
-    max-height: 200px;
+    margin-top: 8px;
+    max-height: 180px;
     overflow-y: auto;
+    font-size: 12px;
 }
 .achievement {
-    font-size: 12px;
     margin-bottom: 4px;
 }
 </style>
@@ -115,7 +116,6 @@ header {
 <script>
 let bitcoins = 0;
 let prestigePoints = 0;
-let autoClickers = [];
 let upgrades = [
     {name:"Small AutoClicker", price:50, amount:0, btcPerSec:0.1},
     {name:"Medium AutoClicker", price:500, amount:0, btcPerSec:1},
