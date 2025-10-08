@@ -15,38 +15,53 @@
     height: 100vh;
     overflow: hidden;
   }
-
-  /* Sidebar */
   .sidebar {
-    width: 300px;
-    background: #111;
+    width: 320px;
+    background: #121212;
     padding: 20px;
-    box-shadow: 2px 0px 10px rgba(0,0,0,0.5);
+    box-shadow: 3px 0px 15px rgba(0,0,0,0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     overflow-y: auto;
   }
   .sidebar h2 {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
     text-align: center;
-    font-size: 1.6rem;
+    letter-spacing: 1px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding-bottom: 10px;
+    width: 100%;
   }
   .upgrade-btn {
-    display: block;
-    background: #222;
-    margin: 10px 0;
+    width: 100%;
+    background: #1e1e1e;
+    margin: 8px 0;
     padding: 15px;
-    border-radius: 10px;
+    border-radius: 12px;
     border: none;
     color: white;
     font-size: 1rem;
     cursor: pointer;
     text-align: left;
-    transition: transform 0.2s ease, background 0.2s ease;
+    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
   }
   .upgrade-btn:hover {
-    background: #333;
-    transform: scale(1.05);
+    background: #2c2c2c;
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgba(255,255,255,0.2);
   }
-
-  /* Main game area */
+  .upgrade-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+  .upgrade-info {
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
   .main {
     flex: 1;
     padding: 40px;
@@ -55,16 +70,19 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    background: linear-gradient(to right, rgba(0,0,0,0.2), rgba(0,0,0,0.1));
   }
   header {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
     font-weight: bold;
     margin-bottom: 20px;
+    text-shadow: 2px 2px 5px black;
   }
   .bitcoin-img {
     width: 200px;
     cursor: pointer;
-    animation: pulse 1.2s infinite;
+    animation: pulse 1.2s infinite ease-in-out;
+    transition: transform 0.1s ease;
   }
   @keyframes pulse {
     0% { transform: scale(1); }
@@ -74,28 +92,33 @@
   .stats {
     font-size: 1.5rem;
     margin-top: 20px;
+    text-shadow: 1px 1px 3px black;
   }
   .restart-btn {
-    background: red;
-    padding: 10px 20px;
+    background: #e74c3c;
+    padding: 12px 25px;
     margin-top: 30px;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     font-size: 1rem;
     color: white;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, background 0.2s ease;
   }
   .restart-btn:hover {
     transform: scale(1.05);
+    background: #c0392b;
   }
   .achievement {
-    background: rgba(255, 215, 0, 0.8);
-    padding: 10px;
+    background: rgba(255, 215, 0, 0.9);
+    padding: 12px;
     border-radius: 8px;
     margin-top: 15px;
     display: none;
     animation: fadeIn 1s ease;
+    color: black;
+    font-weight: bold;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
   }
   @keyframes fadeIn {
     0% { opacity: 0; transform: translateY(-10px); }
@@ -106,7 +129,7 @@
 <body>
 
 <div class="sidebar">
-  <h2>Upgrades</h2>
+  <h2>🛠 Upgrades</h2>
   <div id="upgradeList"></div>
 </div>
 
@@ -115,6 +138,7 @@
   <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg" alt="Bitcoin" class="bitcoin-img" onclick="mineBitcoin()">
   <div class="stats" id="bitcoinBalance">₿ 0</div>
   <div class="stats" id="bitcoinsPerClick">Bitcoins per click: 1</div>
+  <div class="stats" id="autoClickInfo">Auto-click: OFF</div>
   <button class="restart-btn" onclick="restartGame()">Restart Game</button>
   <div id="achievements"></div>
 </div>
@@ -122,16 +146,25 @@
 <script>
   let balance = 0;
   let btcPerClick = 1;
+  let autoClickBtc = 0;
+  let autoClickInterval = null;
+
   let upgrades = {
-    miner: { cost: 10, btcIncrease: 1, count: 0 },
-    farm: { cost: 50, btcIncrease: 5, count: 0 },
-    datacenter: { cost: 200, btcIncrease: 20, count: 0 },
-    ai: { cost: 1000, btcIncrease: 100, count: 0 },
-    quantum: { cost: 5000, btcIncrease: 500, count: 0 },
-    galaxy: { cost: 25000, btcIncrease: 2500, count: 0 },
-    universe: { cost: 100000, btcIncrease: 10000, count: 0 },
-    infinity: { cost: 500000, btcIncrease: 50000, count: 0 }
+    miner: { cost: 10, btcIncrease: 1, count: 0, type: "click" },
+    farm: { cost: 50, btcIncrease: 5, count: 0, type: "click" },
+    datacenter: { cost: 200, btcIncrease: 20, count: 0, type: "click" },
+    ai: { cost: 1000, btcIncrease: 100, count: 0, type: "click" },
+    quantum: { cost: 5000, btcIncrease: 500, count: 0, type: "click" },
+    galaxy: { cost: 25000, btcIncrease: 2500, count: 0, type: "click" },
+    universe: { cost: 100000, btcIncrease: 10000, count: 0, type: "click" },
+    infinity: { cost: 500000, btcIncrease: 50000, count: 0, type: "click" },
+    autoMiner: { cost: 100, btcIncrease: 2, count: 0, type: "auto" },
+    autoFarm: { cost: 500, btcIncrease: 10, count: 0, type: "auto" },
+    autoCenter: { cost: 2000, btcIncrease: 50, count: 0, type: "auto" },
+    autoAI: { cost: 10000, btcIncrease: 200, count: 0, type: "auto" },
+    autoQuantum: { cost: 50000, btcIncrease: 1000, count: 0, type: "auto" }
   };
+
   let achievementsUnlocked = [];
 
   function mineBitcoin() {
@@ -145,8 +178,13 @@
     let upgrade = upgrades[type];
     if (balance >= upgrade.cost) {
       balance -= upgrade.cost;
-      btcPerClick += upgrade.btcIncrease;
       upgrade.count++;
+      if (upgrade.type === "click") {
+        btcPerClick += upgrade.btcIncrease;
+      } else if (upgrade.type === "auto") {
+        autoClickBtc += upgrade.btcIncrease;
+        startAutoClick();
+      }
       upgrade.cost = Math.floor(upgrade.cost * 1.5);
       animateUpgrade(type);
       checkAchievements();
@@ -154,6 +192,15 @@
     } else {
       alert("Not enough Bitcoins!");
     }
+  }
+
+  function startAutoClick() {
+    if (autoClickInterval) return;
+    autoClickInterval = setInterval(() => {
+      balance += autoClickBtc;
+      checkAchievements();
+      updateDisplay();
+    }, 1000);
   }
 
   function animateClick() {
@@ -165,8 +212,8 @@
   function animateUpgrade(type) {
     const btns = document.getElementsByClassName("upgrade-btn");
     for (let btn of btns) {
-      if (btn.innerHTML.toLowerCase().includes(type)) {
-        btn.style.transform = "scale(1.1)";
+      if (btn.innerHTML.toLowerCase().includes(type.toLowerCase())) {
+        btn.style.transform = "scale(1.05)";
         setTimeout(() => btn.style.transform = "scale(1)", 200);
       }
     }
@@ -176,7 +223,7 @@
     let achievementList = [
       { name: "First Bitcoin!", condition: balance >= 1 },
       { name: "Bitcoin Miner", condition: upgrades.miner.count >= 1 },
-      { name: "Mining Empire", condition: upgrades.farm.count >= 1 },
+      { name: "Auto Miner", condition: upgrades.autoMiner.count >= 1 },
       { name: "Data Tycoon", condition: upgrades.datacenter.count >= 1 },
       { name: "AI Overlord", condition: upgrades.ai.count >= 1 },
       { name: "Quantum Lord", condition: upgrades.quantum.count >= 1 },
@@ -184,7 +231,6 @@
       { name: "Universal Overlord", condition: upgrades.universe.count >= 1 },
       { name: "Infinity Master", condition: upgrades.infinity.count >= 1 }
     ];
-
     for (let achievement of achievementList) {
       if (achievement.condition && !achievementsUnlocked.includes(achievement.name)) {
         achievementsUnlocked.push(achievement.name);
@@ -206,10 +252,16 @@
   function updateDisplay() {
     document.getElementById("bitcoinBalance").innerHTML = `₿ ${balance}`;
     document.getElementById("bitcoinsPerClick").innerHTML = `Bitcoins per click: ${btcPerClick}`;
+    document.getElementById("autoClickInfo").innerHTML = `Auto-click: ₿ ${autoClickBtc}/sec`;
     const upgradeList = document.getElementById("upgradeList");
     upgradeList.innerHTML = "";
     for (let key in upgrades) {
-      upgradeList.innerHTML += `<button class="upgrade-btn" onclick="buyUpgrade('${key}')">Buy ${capitalize(key)}<br>Cost: ₿ ${upgrades[key].cost}<br>+${upgrades[key].btcIncrease} BTC/click</button>`;
+      upgradeList.innerHTML += `
+        <button class="upgrade-btn" onclick="buyUpgrade('${key}')">
+          <span class="upgrade-title">Buy ${capitalize(key)}</span>
+          <span class="upgrade-info">Cost: ₿ ${upgrades[key].cost} | +${upgrades[key].btcIncrease} BTC/${upgrades[key].type === "auto" ? "sec" : "click"}</span>
+        </button>
+      `;
     }
   }
 
@@ -220,15 +272,23 @@
   function restartGame() {
     balance = 0;
     btcPerClick = 1;
+    autoClickBtc = 0;
+    clearInterval(autoClickInterval);
+    autoClickInterval = null;
     upgrades = {
-      miner: { cost: 10, btcIncrease: 1, count: 0 },
-      farm: { cost: 50, btcIncrease: 5, count: 0 },
-      datacenter: { cost: 200, btcIncrease: 20, count: 0 },
-      ai: { cost: 1000, btcIncrease: 100, count: 0 },
-      quantum: { cost: 5000, btcIncrease: 500, count: 0 },
-      galaxy: { cost: 25000, btcIncrease: 2500, count: 0 },
-      universe: { cost: 100000, btcIncrease: 10000, count: 0 },
-      infinity: { cost: 500000, btcIncrease: 50000, count: 0 }
+      miner: { cost: 10, btcIncrease: 1, count: 0, type: "click" },
+      farm: { cost: 50, btcIncrease: 5, count: 0, type: "click" },
+      datacenter: { cost: 200, btcIncrease: 20, count: 0, type: "click" },
+      ai: { cost: 1000, btcIncrease: 100, count: 0, type: "click" },
+      quantum: { cost: 5000, btcIncrease: 500, count: 0, type: "click" },
+      galaxy: { cost: 25000, btcIncrease: 2500, count: 0, type: "click" },
+      universe: { cost: 100000, btcIncrease: 10000, count: 0, type: "click" },
+      infinity: { cost: 500000, btcIncrease: 50000, count: 0, type: "click" },
+      autoMiner: { cost: 100, btcIncrease: 2, count: 0, type: "auto" },
+      autoFarm: { cost: 500, btcIncrease: 10, count: 0, type: "auto" },
+      autoCenter: { cost: 2000, btcIncrease: 50, count: 0, type: "auto" },
+      autoAI: { cost: 10000, btcIncrease: 200, count: 0, type: "auto" },
+      autoQuantum: { cost: 50000, btcIncrease: 1000, count: 0, type: "auto" }
     };
     achievementsUnlocked = [];
     document.getElementById("achievements").innerHTML = "";
@@ -237,6 +297,5 @@
 
   updateDisplay();
 </script>
-
 </body>
 </html>
