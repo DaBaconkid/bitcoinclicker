@@ -3,68 +3,77 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bitcoin Clicker</title>
+<title>Bitcoin Clicker Deluxe</title>
 <style>
   body {
     font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    color: white;
     margin: 0;
     padding: 0;
-    text-align: center;
-    overflow-x: hidden;
-  }
-  header {
-    padding: 20px;
-    font-size: 2.2rem;
-    font-weight: bold;
-    background: #1b1b1b;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.4);
-  }
-  main {
-    padding: 20px;
-  }
-  .click-btn {
-    font-size: 1.8rem;
-    padding: 20px 40px;
-    background: gold;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    transition: transform 0.1s ease, box-shadow 0.2s ease;
-    color: black;
-    font-weight: bold;
-  }
-  .click-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.5);
-  }
-  .stats {
-    font-size: 1.2rem;
-    margin-top: 20px;
-  }
-  .upgrades {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: white;
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 30px;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 300px;
+    background: #111;
+    padding: 20px;
+    box-shadow: 2px 0px 10px rgba(0,0,0,0.5);
+    overflow-y: auto;
+  }
+  .sidebar h2 {
+    text-align: center;
+    font-size: 1.6rem;
   }
   .upgrade-btn {
-    background: #444;
+    display: block;
+    background: #222;
+    margin: 10px 0;
     padding: 15px;
     border-radius: 10px;
-    cursor: pointer;
     border: none;
     color: white;
     font-size: 1rem;
-    width: 200px;
-    transition: background 0.2s ease, transform 0.2s ease;
+    cursor: pointer;
+    text-align: left;
+    transition: transform 0.2s ease, background 0.2s ease;
   }
   .upgrade-btn:hover {
-    background: #666;
+    background: #333;
     transform: scale(1.05);
+  }
+
+  /* Main game area */
+  .main {
+    flex: 1;
+    padding: 40px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  header {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  .bitcoin-img {
+    width: 200px;
+    cursor: pointer;
+    animation: pulse 1.2s infinite;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  .stats {
+    font-size: 1.5rem;
+    margin-top: 20px;
   }
   .restart-btn {
     background: red;
@@ -79,11 +88,6 @@
   }
   .restart-btn:hover {
     transform: scale(1.05);
-  }
-  footer {
-    margin-top: 40px;
-    padding: 10px;
-    font-size: 0.9rem;
   }
   .achievement {
     background: rgba(255, 215, 0, 0.8);
@@ -101,28 +105,19 @@
 </head>
 <body>
 
-<header>💰 Bitcoin Clicker</header>
-<main>
-  <h2>Your Bitcoin Balance</h2>
+<div class="sidebar">
+  <h2>Upgrades</h2>
+  <div id="upgradeList"></div>
+</div>
+
+<div class="main">
+  <header>💰 Bitcoin Clicker Deluxe</header>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg" alt="Bitcoin" class="bitcoin-img" onclick="mineBitcoin()">
   <div class="stats" id="bitcoinBalance">₿ 0</div>
-  <button class="click-btn" onclick="mineBitcoin()">Mine Bitcoin</button>
-  
   <div class="stats" id="bitcoinsPerClick">Bitcoins per click: 1</div>
-
-  <h3>Upgrades</h3>
-  <div class="upgrades">
-    <button class="upgrade-btn" onclick="buyUpgrade('miner')">Buy Miner<br>Cost: ₿ 10<br>+1 BTC/click</button>
-    <button class="upgrade-btn" onclick="buyUpgrade('farm')">Buy Mining Farm<br>Cost: ₿ 50<br>+5 BTC/click</button>
-    <button class="upgrade-btn" onclick="buyUpgrade('datacenter')">Buy Data Center<br>Cost: ₿ 200<br>+20 BTC/click</button>
-    <button class="upgrade-btn" onclick="buyUpgrade('ai')">Buy AI Miner<br>Cost: ₿ 1000<br>+100 BTC/click</button>
-  </div>
-
   <button class="restart-btn" onclick="restartGame()">Restart Game</button>
-
   <div id="achievements"></div>
-</main>
-
-<footer>© Bitcoin Clicker Game</footer>
+</div>
 
 <script>
   let balance = 0;
@@ -131,7 +126,11 @@
     miner: { cost: 10, btcIncrease: 1, count: 0 },
     farm: { cost: 50, btcIncrease: 5, count: 0 },
     datacenter: { cost: 200, btcIncrease: 20, count: 0 },
-    ai: { cost: 1000, btcIncrease: 100, count: 0 }
+    ai: { cost: 1000, btcIncrease: 100, count: 0 },
+    quantum: { cost: 5000, btcIncrease: 500, count: 0 },
+    galaxy: { cost: 25000, btcIncrease: 2500, count: 0 },
+    universe: { cost: 100000, btcIncrease: 10000, count: 0 },
+    infinity: { cost: 500000, btcIncrease: 50000, count: 0 }
   };
   let achievementsUnlocked = [];
 
@@ -158,9 +157,9 @@
   }
 
   function animateClick() {
-    const btn = document.querySelector(".click-btn");
-    btn.style.transform = "scale(1.2)";
-    setTimeout(() => btn.style.transform = "scale(1)", 100);
+    const bitcoinImg = document.querySelector(".bitcoin-img");
+    bitcoinImg.style.transform = "scale(1.2)";
+    setTimeout(() => bitcoinImg.style.transform = "scale(1)", 100);
   }
 
   function animateUpgrade(type) {
@@ -179,7 +178,11 @@
       { name: "Bitcoin Miner", condition: upgrades.miner.count >= 1 },
       { name: "Mining Empire", condition: upgrades.farm.count >= 1 },
       { name: "Data Tycoon", condition: upgrades.datacenter.count >= 1 },
-      { name: "AI Overlord", condition: upgrades.ai.count >= 1 }
+      { name: "AI Overlord", condition: upgrades.ai.count >= 1 },
+      { name: "Quantum Lord", condition: upgrades.quantum.count >= 1 },
+      { name: "Galactic Tycoon", condition: upgrades.galaxy.count >= 1 },
+      { name: "Universal Overlord", condition: upgrades.universe.count >= 1 },
+      { name: "Infinity Master", condition: upgrades.infinity.count >= 1 }
     ];
 
     for (let achievement of achievementList) {
@@ -203,11 +206,15 @@
   function updateDisplay() {
     document.getElementById("bitcoinBalance").innerHTML = `₿ ${balance}`;
     document.getElementById("bitcoinsPerClick").innerHTML = `Bitcoins per click: ${btcPerClick}`;
-    const buttons = document.getElementsByClassName("upgrade-btn");
-    buttons[0].innerHTML = `Buy Miner<br>Cost: ₿ ${upgrades.miner.cost}<br>+1 BTC/click`;
-    buttons[1].innerHTML = `Buy Mining Farm<br>Cost: ₿ ${upgrades.farm.cost}<br>+5 BTC/click`;
-    buttons[2].innerHTML = `Buy Data Center<br>Cost: ₿ ${upgrades.datacenter.cost}<br>+20 BTC/click`;
-    buttons[3].innerHTML = `Buy AI Miner<br>Cost: ₿ ${upgrades.ai.cost}<br>+100 BTC/click`;
+    const upgradeList = document.getElementById("upgradeList");
+    upgradeList.innerHTML = "";
+    for (let key in upgrades) {
+      upgradeList.innerHTML += `<button class="upgrade-btn" onclick="buyUpgrade('${key}')">Buy ${capitalize(key)}<br>Cost: ₿ ${upgrades[key].cost}<br>+${upgrades[key].btcIncrease} BTC/click</button>`;
+    }
+  }
+
+  function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
   function restartGame() {
@@ -217,7 +224,11 @@
       miner: { cost: 10, btcIncrease: 1, count: 0 },
       farm: { cost: 50, btcIncrease: 5, count: 0 },
       datacenter: { cost: 200, btcIncrease: 20, count: 0 },
-      ai: { cost: 1000, btcIncrease: 100, count: 0 }
+      ai: { cost: 1000, btcIncrease: 100, count: 0 },
+      quantum: { cost: 5000, btcIncrease: 500, count: 0 },
+      galaxy: { cost: 25000, btcIncrease: 2500, count: 0 },
+      universe: { cost: 100000, btcIncrease: 10000, count: 0 },
+      infinity: { cost: 500000, btcIncrease: 50000, count: 0 }
     };
     achievementsUnlocked = [];
     document.getElementById("achievements").innerHTML = "";
